@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="UTF-8">
+<title>Fjalëkryq – Gjuha Shqipe</title>
+
+<style>
+body {
+    font-family: Arial;
+    text-align: center;
+    background-color: #f4f4f4;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(5, 50px);
+    gap: 5px;
+    justify-content: center;
+    margin: 20px;
+}
+
+input {
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    font-size: 24px;
+    text-transform: uppercase;
+}
+
+.correct {
+    background-color: #a5d6a7; /* Green for correct letters */
+}
+
+.wrong {
+    background-color: #ef9a9a; /* Red for wrong letters */
+}
+
+.present {
+    background-color: #fff176; /* Yellow for letters present in the word but in wrong position */
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#message {
+    font-size: 18px;
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+#success-link {
+    font-size: 18px;
+    margin-top: 15px;
+    color: #4caf50;
+    text-decoration: none;
+}
+
+#success-link:hover {
+    text-decoration: underline;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🧩 Fjalëkryq</h1>
+<p>Plotëso fjalën që lidhet me gjuhën shqipe</p>
+<p><b>Clue:</b> Objekt që përdoret për të lexuar</p>
+
+<div class="grid">
+    <input maxlength="1">
+    <input maxlength="1">
+    <input maxlength="1">
+    <input maxlength="1">
+    <input maxlength="1">
+</div>
+
+<button onclick="kontrollo()">Kontrollo</button>
+
+<p>Shanse të mbetura: <span id="shanse">3</span></p>
+<p id="message"></p>
+<p id="success-link"></p>
+
+<script>
+let fjalaSakte = ["L","I","B","E","R"];
+let shanse = 3;
+
+function kontrollo() {
+    let inputs = document.querySelectorAll("input");
+    let gabim = false;
+    let fjalaPerdore = fjalaSakte.slice(); // Kopjohet fjala e saktë për të verifikuar për shkronjat e pranishme
+
+    // Fillimisht, kontrollo për shkronjat që janë në pozicionin e duhur
+    inputs.forEach((input, index) => {
+        let shkronja = input.value.toUpperCase();
+        if (shkronja === fjalaSakte[index]) {
+            input.className = "correct"; // Shkronjat që janë në vendin e duhur bëhen të gjelbra
+            fjalaPerdore[index] = null;  // Heq shkronjën e gjetur nga fjala për verifikimin më vonë
+        }
+    });
+
+    // Kontrollo për shkronjat që janë në fjalë, por në vendin e gabuar
+    inputs.forEach((input, index) => {
+        let shkronja = input.value.toUpperCase();
+
+        // Verifikojmë nëse shkronja është në fjalë, por jo në pozicionin e duhur
+        if (shkronja !== fjalaSakte[index] && fjalaPerdore.includes(shkronja)) {
+            input.className = "present"; // Shkronjat e pranishme por në vendin e gabuar bëhen të verdha
+            fjalaPerdore[fjalaPerdore.indexOf(shkronja)] = null; // Heq shkronjën nga lista që është përdorur
+        } else if (shkronja !== fjalaSakte[index]) {
+            input.className = "wrong"; // Shkronjat që nuk janë në fjalë bëhen të kuqe
+            gabim = true;
+        }
+    });
+
+    // Kontrollo nëse të gjitha shkronjat janë të sakta dhe në pozitat e duhura
+    if (!gabim && inputs.every((input, index) => input.value.toUpperCase() === fjalaSakte[index])) {
+        document.getElementById("message").innerText = ""; // Heq mesazhin për gabime
+        document.getElementById("success-link").innerHTML = '<a href="#" onclick="resetGame()">🎉 E gjete fjalën! Kliko këtu për të luajtur përsëri.</a>';
+    } else {
+        // Heq një shans vetëm nëse nuk janë të gjitha shkronjat të sakta
+        if (gabim) {
+            shanse--;
+            document.getElementById("shanse").innerText = shanse;
+        }
+
+        // Kontrollo nëse shanset kanë mbaruar
+        if (shanse > 0) {
+            document.getElementById("message").innerText = "❌ Ka gabime. Përpiqu përsëri!";
+            document.getElementById("success-link").innerHTML = ""; // Heq linkun për sukses
+        } else {
+            document.getElementById("message").innerText = "⛔ Gabim! Loja mbaroi.";
+            document.querySelector("button").disabled = true;
+            document.getElementById("success-link").innerHTML = ""; // Heq linkun për sukses
+        }
+    }
+}
+
+// Funksioni për të rinisur lojën
+function resetGame() {
+    // Rinisem shanset dhe ngjyra e inputeve
+    shanse = 3;
+    document.getElementById("shanse").innerText = shanse;
+    document.querySelectorAll("input").forEach(input => {
+        input.value = "";
+        input.className = ""; // Heq ngjyrat
+    });
+    document.querySelector("button").disabled = false;
+    document.getElementById("message").innerText = "";
+    document.getElementById("success-link").innerHTML = "";
+}
+</script>
+
+</body>
+</html>

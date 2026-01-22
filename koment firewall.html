@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Comment Section Online</title>
+<style>
+body {
+    font-family: Arial;
+    width: 450px;
+    margin: 40px auto;
+}
+input, textarea, button {
+    width: 100%;
+    margin-top: 10px;
+    padding: 8px;
+}
+.comment {
+    border-bottom: 1px solid #ccc;
+    margin-top: 15px;
+    padding-bottom: 10px;
+}
+</style>
+</head>
+<body>
+
+<h2>Leave a Comment</h2>
+
+<form id="commentForm">
+    <input type="text" id="name" placeholder="Your name" required>
+    <textarea id="comment" placeholder="Your comment" rows="4" required></textarea>
+    <button type="submit">Send</button>
+</form>
+
+<h3>Comments</h3>
+<div id="comments"></div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+
+// 🔴 Vendos config tënd këtu
+const firebaseConfig = {
+  apiKey: "AIzaSyBRShUBaC1esPIJqKSZdRQn_5BWEcrHihA",
+  authDomain: "gjuha-ne-loje.firebaseapp.com",
+  projectId: "gjuha-ne-loje",
+  storageBucket: "gjuha-ne-loje.firebasestorage.app",
+  messagingSenderId: "530631464379",
+  appId: "1:530631464379:web:6410dfd0acf39eba37209e",
+  measurementId: "G-Q5S3KKMHHE"
+};
+
+// Inicializo Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const commentsDiv = document.getElementById("comments");
+const form = document.getElementById("commentForm");
+
+// Shfaq komentet live nga Firestore
+const q = query(collection(db, "comments"), orderBy("time", "desc"));
+onSnapshot(q, snapshot => {
+    commentsDiv.innerHTML = "";
+    snapshot.forEach(doc => {
+        const data = doc.data();
+        const div = document.createElement("div");
+        div.className = "comment";
+        div.innerHTML = `<strong>${data.name}</strong><p>${data.text}</p>`;
+        commentsDiv.appendChild(div);
+    });
+});
+
+// Shto koment të ri
+form.addEventListener("submit", async e => {
+    e.preventDefault();
+    const name = document.getElementById("name").value;
+    const text = document.getElementById("comment").value;
+
+    await addDoc(collection(db, "comments"), {
+        name: name,
+        text: text,
+        time: Date.now()
+    });
+
+    form.reset();
+});
+</script>
+
+</body>
+</html>
